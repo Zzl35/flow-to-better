@@ -1,7 +1,6 @@
 einops==0.7.0
 gym==0.25.0
 gymnasium==0.29.1
-importlib-resources==6.1.1
 mujoco-py==2.1.2.14
 tensorboard==2.14.0
 torch==1.13.1
