@@ -1,0 +1,12 @@
+python train.py \
+    --domain d4rl \
+    --task hopper-medium-replay-v2 \
+    --episode-len 1000 \
+    --discount 1. \
+    --survival-reward True \
+    --improve-step 20 \
+    --pref-num 15 \
+    --pref-max-iters 10 \
+    --select-num 300 \
+    --threshold 1.05 \
+    --weight-decay 2e-4 
