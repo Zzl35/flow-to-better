@@ -1,9 +1,0 @@
-einops==0.7.0
-gym==0.25.0
-gymnasium==0.29.1
-mujoco-py==2.1.2.14
-tensorboard==2.14.0
-torch==1.13.1
-metaworld @ git+https://github.com/rlworkgroup/metaworld.git@master#egg=metaworld
-d4rl @ git+https://github.com/rail-berkeley/d4rl@master#egg=d4rl
-neorl @ git+https://github.com/polixir/NeoRL.git@master#egg=neorl
