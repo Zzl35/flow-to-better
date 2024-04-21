@@ -201,16 +201,15 @@ def train(args=get_args()):
     dataset.block_ranking(args.improve_step)
 
     print('-------------train diffusion model-------------')
-    # trainer.train_diffusion(
-    #     optim=diffusion_optim,
-    #     ema_decay=0.995,
-    #     epoch_start_ema=args.diff_ema_start_epoch,
-    #     update_ema_every=10,
-    #     max_iters=args.diff_max_iters,
-    #     num_steps_per_iter=args.diff_num_steps_per_iter,
-    #     batch_size=args.diff_batch_size,
-    # )
-    diffusion_model.load_state_dict(torch.load('logs/hopper-medium-replay-v2/improve_step=20/select_num=300/threshold=1.05/seed_1&timestamp_24-0419-150621/model/diffusion-500.pth'))
+    trainer.train_diffusion(
+        optim=diffusion_optim,
+        ema_decay=0.995,
+        epoch_start_ema=args.diff_ema_start_epoch,
+        update_ema_every=10,
+        max_iters=args.diff_max_iters,
+        num_steps_per_iter=args.diff_num_steps_per_iter,
+        batch_size=args.diff_batch_size,
+    )
     diffusion_model.to(args.device)
     
     print('-------------generate data-------------')
