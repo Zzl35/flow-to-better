@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+import matplotlib.pyplot as plt
 from copy import deepcopy
 from utils.helpers import EMA
 
@@ -61,6 +62,10 @@ class Trainer:
 
             if iter % 10 == 0:
                 torch.save(self.preference_model.state_dict(), os.path.join(self.logger.checkpoint_dir, f'preference-{iter}.pth'))
+
+            if (iter + 1) % 5 ==0: 
+                save_path = os.path.join(self.logger._video_dir, 'iter=%d.png'%(iter+1))
+                self.render_preference_model(save_path, discount=1.)
         
         # save
         torch.save(self.preference_model.state_dict(), os.path.join(self.logger.model_dir, 'preference.pth'))
@@ -160,4 +165,27 @@ class Trainer:
                 self.logger.dumpkvs(exclude=["actor_training_progress"])
             
         torch.save(self.actor.state_dict(), os.path.join(self.logger.model_dir, f'actor.pth'))
+
+    @torch.no_grad()
+    def render_preference_model(self, save_path, discount=1., batch_size=32):
+        batch_size = batch_size
+        start = 0
+        scores = np.zeros_like(self.dataset.returns)
+        while start < len(self.dataset.trajs):
+            end = min(start + batch_size, len(self.dataset.trajs))
+            observations, actions, returns, timesteps, masks = self.dataset.get_batch(np.arange(start, end))
+            scores[start: end] = self.preference_model._predict_traj_return(observations, actions, timesteps, masks, discount=discount)
+            start += batch_size
+
+        returns = self.dataset.returns
+        sort_idxs = returns.argsort()
+
+        normed_returns = (returns[sort_idxs] - returns.min()) / (returns.max() - returns.min())
+        normed_prefs = (scores[sort_idxs] - scores.min()) / (scores.max() - scores.min())
+        
+        plt.plot(np.arange(len(returns)), normed_returns)
+        plt.plot(np.arange(len(returns)), normed_prefs)
+        # plt.show()
+        plt.savefig(save_path)
+        plt.close()
 

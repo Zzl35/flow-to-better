@@ -48,7 +48,7 @@ def get_args():
     parser.add_argument("--use-human-label", type=bool, default=False)
     parser.add_argument("--pref-episode-len", type=int, default=100)
     parser.add_argument("--pref-num", type=int, default=15)
-    parser.add_argument("--survival-reward", type=bool, default=False)
+    parser.add_argument("--survival-reward", type=bool, default=True)
     parser.add_argument("--pref-embed-dim", type=int, default=256)
     parser.add_argument("--warmup-steps", type=int, default=10000)
     parser.add_argument("--pref-lr", type=float, default=1e-4)
@@ -75,7 +75,7 @@ def get_args():
     parser.add_argument("--actor-hidden-layer", type=int, default=1)
     parser.add_argument("--weight-decay", type=float, default=2e-4)
     parser.add_argument("--actor-type", type=str, default="deterministic")
-    parser.add_argument("--select-num", type=int, default=10)
+    parser.add_argument("--select-num", type=int, default=300)
     parser.add_argument("--actor-lr", type=float, default=1e-4)
     parser.add_argument("--threshold", type=float, default=1.05)
     parser.add_argument("--actor-max-iters", type=float, default=100)
@@ -122,6 +122,8 @@ def train(args=get_args()):
     else:
         raise ValueError
 
+    if not args.use_human_label:
+        label_dataset = make_dataset(dataset, label_dataset, args.pref_num)
     dataset = BlockRankingDataset(args.task, dataset, normalizer, label_dataset, args.episode_len, args.pref_num, args.device)
 
     args.obs_shape = env.observation_space.shape
@@ -199,15 +201,17 @@ def train(args=get_args()):
     dataset.block_ranking(args.improve_step)
 
     print('-------------train diffusion model-------------')
-    trainer.train_diffusion(
-        optim=diffusion_optim,
-        ema_decay=0.995,
-        epoch_start_ema=args.diff_ema_start_epoch,
-        update_ema_every=10,
-        max_iters=args.diff_max_iters,
-        num_steps_per_iter=args.diff_num_steps_per_iter,
-        batch_size=args.diff_batch_size,
-    )
+    # trainer.train_diffusion(
+    #     optim=diffusion_optim,
+    #     ema_decay=0.995,
+    #     epoch_start_ema=args.diff_ema_start_epoch,
+    #     update_ema_every=10,
+    #     max_iters=args.diff_max_iters,
+    #     num_steps_per_iter=args.diff_num_steps_per_iter,
+    #     batch_size=args.diff_batch_size,
+    # )
+    diffusion_model.load_state_dict(torch.load('logs/hopper-medium-replay-v2/improve_step=20/select_num=300/threshold=1.05/seed_1&timestamp_24-0419-150621/model/diffusion-500.pth'))
+    diffusion_model.to(args.device)
     
     print('-------------generate data-------------')
     generate_trajs, tlens = flow_to_better(preference_model, diffusion_model, dataset, select_num=args.select_num, threshold=args.threshold)
