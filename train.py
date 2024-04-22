@@ -80,7 +80,7 @@ def get_args():
     parser.add_argument("--threshold", type=float, default=1.05)
     parser.add_argument("--actor-max-iters", type=float, default=100)
     parser.add_argument("--actor-num-steps-per-iter", type=float, default=1000)
-    parser.add_argument("--actor-batch-size", type=int, default=256)
+    parser.add_argument("--actor-batch-size", type=int, default=1024)
 
     return parser.parse_args()
 
